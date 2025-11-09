@@ -2,483 +2,786 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-          <title>Art Fight -  Home </title>
-    
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+'use client';
 
-    <meta property="og:title" content="Art Fight">
-    <meta property="og:description" content="An art gifting game">
-    <meta property="og:image" content="https://artfight.net/images/default_banner.jpg">
-    <meta property="og:url" content="https://artfight.net">
+import { useState, useEffect, useRef } from 'react';
 
-    <meta property="twitter:title" content="Art Fight">
-    <meta property="twitter:description" content="An art gifting game">
-    <meta property="twitter:image" content="https://artfight.net/images/default_banner.jpg">
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:site" content="@theartfight" />
-    <meta property="twitter:creator" content="@theartfight" />
+export default function Home() {
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
+  const [showShopMenu, setShowShopMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showBanner, setShowBanner] = useState(true);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name'>('newest');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<typeof characters[0] | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<'seafoam' | 'stardust' | null>(null);
+  const [showAttackForm, setShowAttackForm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const charactersPerPage = 8;
 
-    <meta name="robots" content="noai, noimageai">
-    <meta name="pinterest" content="nopin" />
+  const helpRef = useRef<HTMLDivElement>(null);
+  const shopRef = useRef<HTMLDivElement>(null);
 
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" nonce="d472a23656e79d0e0d6ee087bd15667a" async defer></script>
+  // Close dropdowns when clicking outside or pressing Escape
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (helpRef.current && !helpRef.current.contains(event.target as Node)) {
+        setShowHelpMenu(false);
+      }
+      if (shopRef.current && !shopRef.current.contains(event.target as Node)) {
+        setShowShopMenu(false);
+      }
+    }
 
-    <link rel="icon" href="https://artfight.net/favicon.svg">
-    <script nonce="d472a23656e79d0e0d6ee087bd15667a" src="/js/all.js?id=b3b7a6e6c2b97ee309f19620926aa89d"></script>
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setShowHelpMenu(false);
+        setShowShopMenu(false);
+        setSelectedCharacter(null);
+        setShowLoginModal(false);
+        setShowRegisterModal(false);
+        setShowAttackForm(false);
+      }
+    }
 
-            <link rel="stylesheet" href="/css/all-dark.css?id=bee73a22145b902eca76c16f4a60b503" />
-    
-        <style type="text/css">@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/cyrillic-ext/400/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/greek-ext/400/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/cyrillic/400/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/greek/400/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/vietnamese/400/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Roboto;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto/5.0.11/latin-ext/400/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/latin-ext/400/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/cyrillic/400/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/vietnamese/400/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/greek/400/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/greek-ext/400/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/cyrillic-ext/400/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Roboto Condensed;font-style:normal;font-weight:400;src:url(/cf-fonts/s/roboto-condensed/5.0.14/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}</style>
-                                
-        <style >[wire\:loading], [wire\:loading\.delay], [wire\:loading\.inline-block], [wire\:loading\.inline], [wire\:loading\.block], [wire\:loading\.flex], [wire\:loading\.table], [wire\:loading\.grid], [wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short], [wire\:loading\.delay\.long], [wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest] {display:none;}[wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}input:-webkit-autofill, select:-webkit-autofill, textarea:-webkit-autofill {animation-duration: 50000s;animation-name: livewireautofill;}@keyframes livewireautofill { from {} }</style>
-</head>
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, []);
 
-<body>
-        
-    <div id="wrapper">
-        <!-- Google Analytics -->
-<script nonce="d472a23656e79d0e0d6ee087bd15667a">
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  const characters = [
+    { name: 'Waveburst', src: 'https://ext.same-assets.com/4012241895/792907841.png', owner: 'Artist1', team: 'seafoam' },
+    { name: 'Michi', src: 'https://ext.same-assets.com/4012241895/2965164853.jpeg', owner: 'Artist2', team: 'stardust' },
+    { name: 'Rue', src: 'https://ext.same-assets.com/4012241895/873601443.png', owner: 'Artist3', team: 'seafoam' },
+    { name: 'Haera', src: 'https://ext.same-assets.com/4012241895/2409203464.png', owner: 'Artist4', team: 'stardust' },
+    { name: 'Stormrunner', src: 'https://ext.same-assets.com/4012241895/1833506724.png', owner: 'Artist5', team: 'seafoam' },
+    { name: 'Scootch', src: 'https://ext.same-assets.com/4012241895/2023566745.jpeg', owner: 'Artist6', team: 'stardust' },
+    { name: 'Kravann', src: 'https://ext.same-assets.com/4012241895/3760928712.jpeg', owner: 'Artist7', team: 'seafoam' },
+    { name: 'Caelhen', src: 'https://ext.same-assets.com/4012241895/321490953.png', owner: 'Artist8', team: 'stardust' },
+  ];
 
-  ga('create', 'UA-37994168-4', 'auto');
-  ga('send', 'pageview');
+  let filteredCharacters = characters.filter(char =>
+    char.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-</script>
+  // Sort characters
+  if (sortBy === 'name') {
+    filteredCharacters = [...filteredCharacters].sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === 'oldest') {
+    filteredCharacters = [...filteredCharacters].reverse();
+  }
 
-<!-- Static navbar -->
-<nav class="artfight-nav navbar navbar-dark navbar-static-top navbar-expand-md mb-0">
-  <a class="navbar-brand d-flex align-items-center p-0" href="/">
-    <img class="w-25 mr-2" style="min-width: 20px;" src="https://artfight.net/images/logo40.png"></img>
-    <div class="w-75">ART FIGHT</div>
-  </a>
-  <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  // Pagination
+  const totalPages = Math.ceil(filteredCharacters.length / charactersPerPage);
+  const startIndex = (currentPage - 1) * charactersPerPage;
+  const paginatedCharacters = filteredCharacters.slice(startIndex, startIndex + charactersPerPage);
 
-  <div class="navbar-collapse collapse flex-wrap" id="navbar">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item mr-3"><a class="nav-link" href="https://discord.gg/artfight"><i class="fab fa-discord"></i> Discord </a></li>
-      <li class="nav-item dropdown mr-3">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-aspopup="true" aria-expanded="false"><i class="fas fa-question-square"></i> Help</a>
-        <div class="dropdown-menu">
-          <div class="dropdown-header">INFO</div>
-          <a class="dropdown-item" href="https://artfight.net/info/about">About</a>
-          <a class="dropdown-item" href="https://artfight.net/info/rules">Rules</a>
-          <a class="dropdown-item" href="https://artfight.net/info/faq">FAQ</a>
-          <a class="dropdown-item" href="https://artfight.net/info/changelog">Changelog</a>
-          <a class="dropdown-item" href="https://artfight.net/info/art-assets">Art Assets</a>
-          <a class="dropdown-item" href="https://artfight.net/modmail/new">Submit a Modmail Inquiry</a>
-          <div role="separator" class="dropdown-divider"></div>
-          <div class="dropdown-header">GUIDES</div>
-          <a class="dropdown-item" href="https://artfight.net/info/guide-attacks">Attack Categorization</a>
-          <a class="dropdown-item" href="https://artfight.net/info/guide-filters">Filtering Guide</a>
-          <a class="dropdown-item" href="https://artfight.net/info/guide-bbcode">BBCode</a>
-          <div role="separator" class="dropdown-divider"></div>
-          <a class="dropdown-item" href="https://artfight.net/news">News</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown mr-3">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-aspopup="true" aria-expanded="false"><i class="fas fa-shopping-cart"></i> Shop<!--<span class="badge badge-anim badge-pill badge-primary ml-1">new!</span>--></a>
-        <div class="dropdown-menu">
-          <a class="dropdown-item" href="https://artfight.net/donate">Support Art Fight</a>
-          <hr class="mt-2 mb-1" />
-          <a class="dropdown-item" href="https://shop.artfight.net/" target="_blank">Merch</a>
-        </div>
-      </li>
-            <li class="nav-item dropdown mr-3">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-aspopup="true" aria-expanded="false">
-          <i class="fas fa-compass"></i> Discover
-        </a>
-        <div class="dropdown-menu">
-          <a class="dropdown-item" href="https://artfight.net/discovery">Discovery Home</a>
-          <div role="separator" class="dropdown-divider"></div>
-          
-          <div class="dropdown-header">SEARCH <div class="badge badge-info ml-1">new</div></div>
-          <a class="dropdown-item" href="https://artfight.net/discovery/search-users">Users</a>
-          <a class="dropdown-item" href="https://artfight.net/discovery/search-characters">Characters</a>
-          <a class="dropdown-item" href="https://artfight.net/discovery/search-attacks">Attacks</a>
-          <div role="separator" class="dropdown-divider"></div>
-                    <div class="dropdown-header">BROWSE <div class="badge badge-secondary ml-1">old</div></div>
-          <a class="dropdown-item" href="https://artfight.net/members">Members</a>
-          <a class="dropdown-item" href="https://artfight.net/browse/attacks">Attacks</a>
-          <a class="dropdown-item" href="https://artfight.net/browse/characters">Characters</a>
-          <a class="dropdown-item" href="https://artfight.net/character/random">Random Character</a>
-          <a class="dropdown-item" href="https://artfight.net/user/random">Random User</a>
-          <a class="dropdown-item" href="https://artfight.net/browse/tags">
-            Tag Search
-          </a>
-        </div>
-      </li>
-              <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-aspopup="true" aria-expanded="false"><i class="fas fa-plus"></i> Submit</a>
-          <div class="dropdown-menu">
-                        <a class="dropdown-item" href="https://artfight.net/submit/character">Character</a>
+  // Reset to page 1 when search/sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy]);
+
+  return (
+    <div className="min-h-screen bg-[#252525] text-white">
+      {/* Navigation Header */}
+      <nav className="bg-[#1a1a1a] border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3 md:gap-6">
+            <a href="#" className="flex items-center gap-2">
+              <img
+                src="https://ext.same-assets.com/4012241895/1125186179.png"
+                alt="Art Fight Logo"
+                className="h-8"
+              />
+              <span className="text-xl font-bold">ART FIGHT</span>
+            </a>
+            <a href="#" className="text-gray-300 hover:text-white text-sm md:text-base">
+              Discord
+            </a>
+
+            {/* Help Dropdown */}
+            <div className="relative" ref={helpRef}>
+              <button
+                onClick={() => {
+                  setShowHelpMenu(!showHelpMenu);
+                  setShowShopMenu(false);
+                }}
+                className="text-gray-300 hover:text-white text-sm md:text-base flex items-center gap-1"
+              >
+                Help ▼
+              </button>
+              {showHelpMenu && (
+                <div className="absolute top-full left-0 mt-2 bg-[#2a2a2a] border border-gray-700 rounded-lg shadow-xl min-w-[200px] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">About</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Rules</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">FAQ</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Changelog</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Art Assets</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Submit Inquiry</a>
+                  <div className="border-t border-gray-700 my-1"></div>
+                  <div className="px-4 py-2 text-xs text-gray-500 uppercase">Guides</div>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Attack Categorization</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Filtering Guide</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">BBCode</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">News</a>
+                </div>
+              )}
+            </div>
+
+            {/* Shop Dropdown */}
+            <div className="relative" ref={shopRef}>
+              <button
+                onClick={() => {
+                  setShowShopMenu(!showShopMenu);
+                  setShowHelpMenu(false);
+                }}
+                className="text-gray-300 hover:text-white text-sm md:text-base flex items-center gap-1"
+              >
+                Shop ▼
+              </button>
+              {showShopMenu && (
+                <div className="absolute top-full left-0 mt-2 bg-[#2a2a2a] border border-gray-700 rounded-lg shadow-xl min-w-[200px] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Support Art Fight</a>
+                  <a href="#" className="block px-4 py-2 hover:bg-[#3a3a3a] text-sm">Merch</a>
+                </div>
+              )}
+            </div>
           </div>
-        </li>
-                </ul>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowRegisterModal(true)}
+              className="text-gray-300 hover:text-white text-sm md:text-base"
+            >
+              Register
+            </button>
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="text-gray-300 hover:text-white text-sm md:text-base"
+            >
+              Log In
+            </button>
+          </div>
+        </div>
+      </nav>
 
-    <hr role="separator" class="d-block d-sm-none dropdown-divider element-disabled">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-[#5fabd8] to-[#4777a2] py-16 text-center">
+        <img
+          src="https://ext.same-assets.com/4012241895/1125186179.png"
+          alt="Art Fight Logo"
+          className="h-32 mx-auto mb-6"
+        />
+        <h1 className="text-5xl font-bold mb-4 text-white">Welcome to Art Fight!</h1>
+        <p className="text-2xl text-white/90">The annual art gifting game, starting on July 1st!</p>
+      </div>
 
-    <ul class="navbar-nav ml-auto">
-                            <li class="nav-item mr-3"><a class="nav-link" href="/team/22.crystals">Team Crystals</a></li>
-                <li class="nav-item dropdown">
-           <a href="https://artfight.net/~MarkShroom" class="nav-link username-navbar">
-               <strong><span style="color: #d35e88;"> MarkShroom</span></strong>
-           </a>
-           <a href="https://artfight.net/~MarkShroom" class="nav-link dropdown-toggle avatar-dropdown" data-toggle="dropdown" role="button" aria-aspopup="true" aria-expanded="false">
-               <div class="d-none d-md-inline-block navbar-icon" style="background-image: url(https://images.artfight.net/avatar/748/748959.png?t=1762641618);">
-                                         <span class="badge badge-danger badge-pill navbar-icon-badge">44</span>
-                                  </div>
-                                 <span class="badge badge-danger badge-pill d-md-none" style="display:inline-block;">44</span>
-                          </a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="https://artfight.net/~MarkShroom">Profile</a>
-            <a class="dropdown-item" href="https://artfight.net/user/settings">Settings</a>
-            <a class="dropdown-item" href="https://artfight.net/team/sort">Team Settings</a>
-            <a class="dropdown-item" href="https://artfight.net/reports">Reports</a>
-            <div role="separator" class="dropdown-divider"></div>
-            <div class="dropdown-header">MANAGE</div>
-            <a class="dropdown-item" href="https://artfight.net/manage/characters">Characters</a>
-            <a class="dropdown-item" href="https://artfight.net/manage/bookmarks/folders">Bookmarks</a>
-            <a class="dropdown-item" href="https://artfight.net/manage/attacks">Attacks</a>
-            <a class="dropdown-item" href="https://artfight.net/manage/achievements">Achievements</a>
-            <a class="dropdown-item" href="https://artfight.net/user/settings/following">People You Follow</a>
-            <div role="separator" class="dropdown-divider"></div>
-            <div class="dropdown-header">MESSAGES</div>
-            <a class="dropdown-item pr-2" href="https://artfight.net/messages">
-              <div class="d-flex align-items-center">Messages </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Thank You Banner */}
+        {showBanner && (
+          <div className="bg-[#2a2a2a] border-l-4 border-[#5fabd8] rounded-lg p-6 mb-8 relative">
+            <button
+              onClick={() => setShowBanner(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-700 transition-colors"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold mb-3 text-center">Thank you for participating in Art Fight 2025!</h2>
+            <p className="text-center mb-6 text-gray-300">
+              We'd also love your feedback - did you enjoy Art Fight this year? Anything you'd change? Please let us know via the{' '}
+              <a href="#" className="text-[#5fabd8] hover:underline">2025 Feedback Form!</a>
+            </p>
+            <div className="flex justify-center">
+              <img
+                src="https://ext.same-assets.com/4012241895/2221861973.png"
+                alt="Thank You 2025"
+                className="max-w-2xl w-full"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Guide Buttons */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12">
+          {['How It Works', 'Site Rules', 'Attack Guide', 'Filters Guide', 'FAQ'].map((text) => (
+            <a
+              key={text}
+              href="#"
+              className="bg-[#417682] hover:bg-[#4f8a98] text-white font-semibold py-3 px-6 rounded text-center transition-colors"
+            >
+              {text}
             </a>
-            <a class="dropdown-item pr-2" href="https://artfight.net/attacks">
-              <div class="d-flex align-items-center">Attacks <span class="badge badge-success badge-pill ml-auto">44</span></div>
-            </a>
-            <a class="dropdown-item pr-2" href="https://artfight.net/modmail">
-              <div class="d-flex align-items-center">Modmail </div>
-            </a>
-            <a class="dropdown-item pr-2" href="https://artfight.net/notifications">
-              <div class="d-flex align-items-center">Notifications </div>
-            </a>
-            <a class="dropdown-item pr-2" href="https://artfight.net/subscriptions">
-              <div class="d-flex align-items-center">
-                <span class="mr-2">Subscriptions</span>
-                                  <span class="badge badge-info badge-pill ml-auto">new</span>
-                              </div>
-            </a>
-            <div role="separator" class="dropdown-divider"></div>
-            <form method="POST" action="/logout"><input type="hidden" name="_token" value="SavjC2ArfSTl8l2eemCYUjEdHCXtRgmhLeWes2Mm">
-              <button class="dropdown-item" type="submit">Logout</button>
+          ))}
+        </div>
+
+        {/* Team Selection */}
+        <div className="mb-12 bg-[#2a2a2a] rounded-lg p-8 border-2 border-gray-700">
+          <h2 className="text-3xl font-bold mb-6 text-center text-[#5fabd8]">Choose Your Team!</h2>
+          <p className="text-center text-gray-300 mb-6">
+            Art Fight is an annual art trading game! Choose a team and create art for the opposing team to earn points.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Team Seafoam */}
+            <button
+              onClick={() => setSelectedTeam('seafoam')}
+              className={`p-6 rounded-lg border-4 transition-all ${
+                selectedTeam === 'seafoam'
+                  ? 'border-[#5fabd8] bg-[#5fabd8]/20 scale-105'
+                  : 'border-[#5fabd8]/50 hover:border-[#5fabd8] hover:scale-102'
+              }`}
+            >
+              <h3 className="text-2xl font-bold text-[#5fabd8] mb-2">Team Seafoam</h3>
+              <p className="text-gray-300 text-sm mb-4">Ride the waves of creativity</p>
+              <div className="bg-[#5fabd8] h-24 rounded-lg mb-3"></div>
+              {selectedTeam === 'seafoam' && (
+                <div className="text-green-400 font-semibold">✓ Selected</div>
+              )}
+            </button>
+
+            {/* Team Stardust */}
+            <button
+              onClick={() => setSelectedTeam('stardust')}
+              className={`p-6 rounded-lg border-4 transition-all ${
+                selectedTeam === 'stardust'
+                  ? 'border-[#bb415e] bg-[#bb415e]/20 scale-105'
+                  : 'border-[#bb415e]/50 hover:border-[#bb415e] hover:scale-102'
+              }`}
+            >
+              <h3 className="text-2xl font-bold text-[#bb415e] mb-2">Team Stardust</h3>
+              <p className="text-gray-300 text-sm mb-4">Shine bright like the stars</p>
+              <div className="bg-[#bb415e] h-24 rounded-lg mb-3"></div>
+              {selectedTeam === 'stardust' && (
+                <div className="text-green-400 font-semibold">✓ Selected</div>
+              )}
+            </button>
+          </div>
+          {selectedTeam && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => setShowAttackForm(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold text-lg transition-colors"
+              >
+                Submit an Attack!
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Characters Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-[#5fabd8]">Recent Characters</h2>
+            </div>
+
+            {/* Search and Filter Bar */}
+            <div className="mb-4 flex gap-3">
+              <input
+                type="text"
+                placeholder="Search characters..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-4 py-2 bg-[#2a2a2a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5fabd8] transition-colors"
+              />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'name')}
+                className="px-4 py-2 bg-[#2a2a2a] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#5fabd8] transition-colors cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="name">By Name</option>
+              </select>
+            </div>
+
+            {/* Characters Grid */}
+            <div className="grid grid-cols-4 gap-3">
+              {paginatedCharacters.length > 0 ? (
+                paginatedCharacters.map((char, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedCharacter(char)}
+                    className="border-4 border-[#d4beab] rounded-lg overflow-hidden hover:border-[#5fabd8] transition-all hover:scale-105 group relative"
+                  >
+                    <img src={char.src} alt={char.name} className="w-full h-full object-cover aspect-square" />
+                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-sm font-semibold text-center px-2">{char.name}</span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="col-span-4 text-center py-8 text-gray-400">
+                  No characters found matching "{searchQuery}"
+                </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-[#2a2a2a] border border-gray-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3a3a3a] transition-colors"
+                >
+                  ← Previous
+                </button>
+                <span className="text-gray-400 px-4">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-[#2a2a2a] border border-gray-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3a3a3a] transition-colors"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+
+            {/* View More Button */}
+            <div className="mt-4 text-center">
+              <a href="#" className="text-[#5fabd8] hover:underline">
+                Browse All Characters →
+              </a>
+            </div>
+          </div>
+
+          {/* News Section */}
+          <div>
+            <h2 className="text-3xl font-bold mb-6 text-[#5fabd8]">News</h2>
+            <div className="bg-[#2a2a2a] rounded-lg p-6 mb-6">
+              <h3 className="text-2xl font-semibold mb-3 text-[#5fabd8]">Art Fight November Update</h3>
+              <p className="text-gray-300 mb-4">
+                Hello Art Fighters!
+                <br /><br />
+                The development period is over and the site has now been re-opened! Thank you so much for your patience.
+                This period was greatly needed and going forward, we will likely continue to have an annual break period dedicated
+                to development. Please find a summary of all that has been achieved during the break below, alongside additional news!...
+                <a href="#" className="text-[#5fabd8] hover:underline">read more</a>
+              </p>
+            </div>
+
+            {/* Discord Widget */}
+            <div className="bg-[#2a2a2a] rounded-lg p-6">
+              <p className="text-sm text-gray-400 mb-3">COME CHAT WITH US ON DISCORD!</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="https://ext.same-assets.com/4012241895/1164382214.png"
+                    alt="Discord"
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <div className="font-bold">Art Fight</div>
+                    <div className="text-sm text-gray-400">
+                      <span className="text-green-500">●</span> 104,160 Online • 405,597 Members
+                    </div>
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold transition-colors"
+                >
+                  Join
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Members */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-[#5fabd8]">Featured Members</h2>
+          <div className="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2">
+            {[
+              'https://ext.same-assets.com/4012241895/1622683696.gif',
+              'https://ext.same-assets.com/4012241895/1411298716.gif',
+              'https://ext.same-assets.com/4012241895/497071740.gif',
+              'https://ext.same-assets.com/4012241895/4268291591.png',
+              'https://ext.same-assets.com/4012241895/4013702267.jpeg',
+              'https://ext.same-assets.com/4012241895/1750360471.gif',
+              'https://ext.same-assets.com/4012241895/3341443903.png',
+              'https://ext.same-assets.com/4012241895/594419740.png',
+              'https://ext.same-assets.com/4012241895/1566826675.jpeg',
+              'https://ext.same-assets.com/4012241895/416090625.gif',
+              'https://ext.same-assets.com/4012241895/3623770058.png',
+              'https://ext.same-assets.com/4012241895/811869090.png',
+              'https://ext.same-assets.com/4012241895/1140942212.gif',
+              'https://ext.same-assets.com/4012241895/3392170750.png',
+              'https://ext.same-assets.com/4012241895/2583240150.png',
+              'https://ext.same-assets.com/4012241895/1395150601.jpeg',
+              'https://ext.same-assets.com/4012241895/3935209914.png',
+              'https://ext.same-assets.com/4012241895/2334156103.png',
+              'https://ext.same-assets.com/4012241895/372819337.png',
+              'https://ext.same-assets.com/4012241895/3992660200.png',
+              'https://ext.same-assets.com/4012241895/1879477215.png',
+              'https://ext.same-assets.com/4012241895/1030551236.png',
+              'https://ext.same-assets.com/4012241895/2090125482.gif',
+              'https://ext.same-assets.com/4012241895/1981854242.png',
+              'https://ext.same-assets.com/4012241895/2534953823.png',
+              'https://ext.same-assets.com/4012241895/2326617172.png',
+              'https://ext.same-assets.com/4012241895/1529962612.png',
+              'https://ext.same-assets.com/4012241895/3471418524.png',
+              'https://ext.same-assets.com/4012241895/2851400026.gif',
+              'https://ext.same-assets.com/4012241895/3954423871.png',
+            ].map((src, i) => (
+              <a
+                key={i}
+                href="#"
+                className="border-3 border-gray-700 hover:border-[#5fabd8] rounded-lg overflow-hidden transition-colors"
+              >
+                <img src={src} alt={`Member ${i + 1}`} className="w-full h-full object-cover aspect-square" />
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-[#1a1a1a] border-t border-gray-800 py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-6">
+            {/* Social Icons */}
+            <div className="flex gap-4 text-2xl">
+              <a href="#" className="text-gray-400 hover:text-white">🐦</a>
+              <a href="#" className="text-gray-400 hover:text-white">📷</a>
+              <a href="#" className="text-gray-400 hover:text-white">🎮</a>
+              <a href="#" className="text-gray-400 hover:text-white">📝</a>
+              <a href="#" className="text-gray-400 hover:text-white">🎵</a>
+              <a href="#" className="text-gray-400 hover:text-white">▶️</a>
+              <a href="#" className="text-gray-400 hover:text-white">🦋</a>
+            </div>
+
+            {/* Footer Links */}
+            <div className="flex gap-2 text-sm text-gray-400">
+              <a href="#" className="hover:text-white">Help</a>
+              <span>|</span>
+              <a href="#" className="hover:text-white">Contact a Mod</a>
+              <span>|</span>
+              <a href="#" className="hover:text-white">Rules</a>
+              <span>|</span>
+              <a href="#" className="hover:text-white">ToS</a>
+              <span>|</span>
+              <a href="#" className="hover:text-white">Privacy</a>
+            </div>
+
+            {/* Support Info */}
+            <div className="text-right lg:min-w-[300px]">
+              <div className="text-sm mb-2">
+                2025 Contributions: <strong className="text-white">$193995.45</strong>
+              </div>
+              <div className="text-sm text-gray-400 mb-2">Goal (tier 3): $200000</div>
+              <div className="w-full max-w-sm bg-gray-700 rounded-full h-2 mb-3 ml-auto">
+                <div className="bg-[#5fabd8] h-2 rounded-full" style={{ width: '97%' }}></div>
+              </div>
+              <a
+                href="#"
+                className="bg-[#417682] hover:bg-[#4f8a98] text-white px-6 py-2 rounded font-semibold inline-block transition-colors"
+              >
+                Support
+              </a>
+            </div>
+          </div>
+
+          <div className="text-center text-sm text-gray-400">
+            <a href="#" className="hover:text-white">Credits</a>
+            <span className="mx-2">|</span>
+            <span>© 2015 - 2025 Art Fight</span>
+          </div>
+
+          <div className="text-center text-xs text-gray-500 mt-2">
+            5:22 PM
+          </div>
+        </div>
+      </footer>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#2a2a2a] rounded-lg p-8 max-w-md w-full border-2 border-gray-700 relative">
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
+            >
+              ✕
+            </button>
+            <h2 className="text-3xl font-bold mb-6 text-[#5fabd8]">Log In</h2>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Username or Email</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Enter your username or email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Enter your password"
+                />
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span>Remember me</span>
+                </label>
+                <a href="#" className="text-[#5fabd8] hover:underline">Forgot password?</a>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#5fabd8] hover:bg-[#4f8a98] text-white font-bold py-3 rounded transition-colors"
+              >
+                Log In
+              </button>
+              <div className="text-center text-sm text-gray-400">
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    setShowRegisterModal(true);
+                  }}
+                  className="text-[#5fabd8] hover:underline"
+                >
+                  Register here
+                </button>
+              </div>
             </form>
           </div>
-        </li>
-          </ul>
-  </div><!--/.nav-collapse -->
-</nav>
-                    <div class="banner-container mb-3">
-                                                <a href="/"><div class="banner" style="background-image: url(https://artfight.net/images/default_banner.jpg);"></div></a>
-    
-  
-
-    
-
-            </div>
-                <div id="content">
-                <div class="container-fluid">
-                                                                                                <div class="container front-page">
-
-
-
-<div class="home-title">
-    <h1>Welcome to Art Fight!</h1>
-    <h3 class="font-weight-normal text-muted">The annual art gifting game, starting on July 1st!</h3>
-
-    <div class="bs-callout bs-callout-primary border-primary info-blurb flex-column">
-        <div class="w-100 mb-3 d-flex flex-row align-items-center justify-content-between">
-            <i class="far fa-sticky-note"></i>
-            <div>
-                <div style="text-align:center;"><span style="font-size:1.5em;">Thank you for participating in Art Fight 2025!</span></div><div style="text-align:center;"></div><div style="text-align:center;">We'd also love your feedback - did you enjoy Art Fight this year? Anything you'd change? Please let us know via the <a href="https://form.artfight.net/feedback"><b>2025 Feedback Form!</b></a><b></b></div><div style="text-align:center;"><img src="https://images.artfight.net/2025/ThankYou2025.png" alt="ThankYou2025.png" /></div>
-            </div>
-            <span class="far fa-question-circle timestamp-tooltip" data-toggle="tooltip" title="Last updated: 2025-11-01 14:39:38"></span>
         </div>
-            </div>
+      )}
 
-</div>
-    <hr>
-  <div class="home-buttons">
-    <div class="d-flex">
-    </div>
-    <div class="row">
-      <div class="col-sm-6 col-lg mb-3"><a type="button" class="btn btn-primary btn-lg btn-block" href="https://artfight.net/info/about">How It Works</a></div>
-      <div class="col-sm-6 col-lg mb-3"><a type="button" class="btn btn-primary btn-lg btn-block" href="https://artfight.net/info/rules">Site Rules</a></div>
-      <div class="col-sm-6 col-lg mb-3"><a type="button" class="btn btn-primary btn-lg btn-block" href="https://artfight.net/info/guide-attacks">Attack Guide</a></div>
-      <div class="col-sm-6 col-lg mb-3"><a type="button" class="btn btn-primary btn-lg btn-block" href="https://artfight.net/info/guide-filters">Filters Guide</a></div>
-      <div class="col-sm-12 col-lg mb-3"><a type="button" class="btn btn-primary btn-lg btn-block" href="https://artfight.net/info/faq">FAQ</a></div>
-    </div>
-      </div>
-  <hr class="mt-0">
-    <div class="row">
-                    <div class="col-12 col-lg-7 pr-5 recentAndRandom">
-        
-            
-        
-              <div class="clearfix">
-                  <h2><a href="browse/characters">Recent Characters</a></h2>
-                                        <div class="row">
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984037.envis-forstora"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984037"
-            style="border-color: #ba8c25">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_YNm2FMWoZCDq4Xrww78w4Pl34UeKq5gIrSuICcwJ5fCJIRfdZY9DBHHMYHCW.png?t=1762641682"
-            data-toggle="tooltip"
-            title="Envis Forstora by TheCatGuy"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984036.munleo"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984036"
-            style="border-color: #8e9995">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_HRu9ceIaeWrLDUU6ULGtxvBzDIewu70EN1TXjibBfQNIlfJJEejuTld4njLs.png?t=1762641676"
-            data-toggle="tooltip"
-            title="Munleo by J-V-C-N"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984035.ryuiki"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984035"
-            style="border-color: #ba8c25">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_LWfiP5Al12HgQnrhotjPpma8zVhoTZdCK5oNExrGjHCkylFDWUCumdaQDqcc.png?t=1762641651"
-            data-toggle="tooltip"
-            title="Ryuiki by oxytocinn"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984034.ginger"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984034"
-            style="border-color: #ba8c25">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_68kXNjA962xeCCWvt9lQcBEsxuCvqrI80Cwf1cyMqRQ5sdUvSd59rQYP12fU.png?t=1762641594"
-            data-toggle="tooltip"
-            title="Ginger {} by Starfullkv"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984033.ofp-one-falling-petal"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984033"
-            style="border-color: #ba8c25">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_aobW6wD4IQx97OiPE9PkrF8XTMW7G8Rsk4x4aMbXUTIKS87BvU3YgT1A8b7h.png?t=1762641647"
-            data-toggle="tooltip"
-            title="OFP (One Falling Petal) by 0humanoidcreature0"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984032.cabbit"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984032"
-            style="border-color: #d35e88">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_C1HaeiSK1fGNO9J6ND8jPjy3cb4hxQMsc909ua1ZvmTRvGPxtAsUbdSmdWeT.png?t=1762641550"
-            data-toggle="tooltip"
-            title="cabbit by xloyis"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984031.cousin-jack"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984031"
-            style="border-color: #ba8c25">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_S4cm5OBdFBHyY4Du0bagNlc3oTwstMNJ3jPJkKqBHNKRXQAsfuwezeVr2doX.png?t=1762641558"
-            data-toggle="tooltip"
-            title="cousin jack by raviolilegend"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                        <div class="col-3 p-0">
-                                  <a href="https://artfight.net/character/7984030.cyko"
-            class="card p-1 m-1 thumb-attack character-thumb thumbnail"
-            data-id="7984030"
-            style="border-color: #8e9995">
-        <img class="mx-auto rounded" src="https://images.artfight.net/character/th_6TEvV5Oo7rb1fpfZnT778CLN0U9QxL1M0jaX9nOCdqPHBr8FjlqF6EX1pcZR.png?t=1762641531"
-            data-toggle="tooltip"
-            title="Cyko by sadiwi"/>
-            <div class="text-center"></div>
-        </a>
-                              </div>
-                                                                              </div>
-                                </div>
-            </div>
-        
-        <div class="col-12 col-lg-5 newsColumn">
-
-        <hr class="d-block d-lg-none">
-
-        
-        <h2><a href="news">News</a> </h2>
-                    <h3 class="text-truncate"><a href="https://artfight.net/news/106.art-fight-november-update">Art Fight November Update</a></h3>
-            Hello Art Fighters!<br />
-<br />
-The development period is over and the site has now been re-opened! Thank you so much for your patience. This period was greatly needed and going forward, we will likely continue to have an annual break period dedicated to development. Please find a summary of all that has been achieved during the break below, alongside additional news!...<a href="https://artfight.net/news/106.art-fight-november-update">read more</a>
-        
-        <hr>
-
-        
-        <div id="discordInviteBox"></div>
-
-        
-        <div class="clearfix">
-            <h2 class="mt-3"><a href="featured">Featured Members</a></h2>
-            <div class="row justify-content-center">
-                <div class="featured-icon m-1"><a href="/~Vitlok"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/21/21451.gif?t=1762612901);" /></span></a></div><div class="featured-icon m-1"><a href="/~Manakete"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/64/64403.gif?t=1762639534);" /></span></a></div><div class="featured-icon m-1"><a href="/~somber77"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/17/17057.gif?t=1762621821);" /></span></a></div><div class="featured-icon m-1"><a href="/~V01D"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/133/133606.png?t=1762470060);" /></span></a></div><div class="featured-icon m-1"><a href="/~Luckykitten"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/179/179202.jpeg?t=1760162494);" /></span></a></div><div class="featured-icon m-1"><a href="/~TundraShark"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/719/719737.gif?t=1761526692);" /></span></a></div><div class="featured-icon m-1"><a href="/~SharaXOfficial"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/91/91593.png?t=1757295224);" /></span></a></div><div class="featured-icon m-1"><a href="/~WingsOfAvalon"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/440/440752.png?t=1762639998);" /></span></a></div><div class="featured-icon m-1"><a href="/~cinnamonbunnydog"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/102/102612.jpg?t=1762447836);" /></span></a></div><div class="featured-icon m-1"><a href="/~Silkirose"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/197/197249.png?t=1760732426);" /></span></a></div><div class="featured-icon m-1"><a href="/~Tanukified"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/566/566929.gif?t=1760025604);" /></span></a></div><div class="featured-icon m-1"><a href="/~sar_elle"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/1335/1335346.png?t=1756260015);" /></span></a></div><div class="featured-icon m-1"><a href="/~TentaclePunk"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/259/259333.jpg?t=1757268796);" /></span></a></div><div class="featured-icon m-1"><a href="/~RenmaDreams"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/429/429443.gif?t=1762290130);" /></span></a></div><div class="featured-icon m-1"><a href="/~Turtlemurmurs"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/92/92522.png?t=1762620097);" /></span></a></div><div class="featured-icon m-1"><a href="/~Michimonie"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/1056/1056852.png?t=1762584456);" /></span></a></div><div class="featured-icon m-1"><a href="/~SHAMENET"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/335/335365.png?t=1762381726);" /></span></a></div><div class="featured-icon m-1"><a href="/~RAINgoesUPowo"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/211/211970.gif?t=1762060698);" /></span></a></div><div class="featured-icon m-1"><a href="/~stupidcopper"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/373/373475.jpg?t=1761644192);" /></span></a></div><div class="featured-icon m-1"><a href="/~QxQuiche"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/829/829472.png?t=1754072244);" /></span></a></div><div class="featured-icon m-1"><a href="/~theuwuchann"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/2/2783.gif?t=1761797880);" /></span></a></div><div class="featured-icon m-1"><a href="/~EggApokalypse"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/1233/1233374.png?t=1754758795);" /></span></a></div><div class="featured-icon m-1"><a href="/~huskylexi"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/842/842498.png?t=1754571076);" /></span></a></div><div class="featured-icon m-1"><a href="/~Thimbleena"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/195/195383.png?t=1762636003);" /></span></a></div><div class="featured-icon m-1"><a href="/~vangh17a"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/4/4168.gif?t=1759780086);" /></span></a></div><div class="featured-icon m-1"><a href="/~SnowyBee"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/637/637364.gif?t=1759232429);" /></span></a></div><div class="featured-icon m-1"><a href="/~Speidurr"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/277/277541.gif?t=1762288432);" /></span></a></div><div class="featured-icon m-1"><a href="/~Selenyx"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/140/140594.gif?t=1762029554);" /></span></a></div><div class="featured-icon m-1"><a href="/~cr0wfeathers"><span class="icon-user" style="border-color: #d35e88;background-image: url(https://images.artfight.net/avatar/27/27684.png?t=1761081843);" /></span></a></div><div class="featured-icon m-1"><a href="/~OrionisZeta"><span class="icon-user" style="border-color: #ba8c25;background-image: url(https://images.artfight.net/avatar/880/880279.png?t=1762624137);" /></span></a></div>
-            </div>
+      {/* Register Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#2a2a2a] rounded-lg p-8 max-w-md w-full border-2 border-gray-700 relative">
+            <button
+              onClick={() => setShowRegisterModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
+            >
+              ✕
+            </button>
+            <h2 className="text-3xl font-bold mb-6 text-[#5fabd8]">Register</h2>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Username</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Choose a username"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Email</label>
+                <input
+                  type="email"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Create a password"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Confirm Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Confirm your password"
+                />
+              </div>
+              <div className="flex items-start gap-2 text-sm">
+                <input type="checkbox" className="mt-1" />
+                <span className="text-gray-400">I agree to the Terms of Service and Privacy Policy</span>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#5fabd8] hover:bg-[#4f8a98] text-white font-bold py-3 rounded transition-colors"
+              >
+                Create Account
+              </button>
+              <div className="text-center text-sm text-gray-400">
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRegisterModal(false);
+                    setShowLoginModal(true);
+                  }}
+                  className="text-[#5fabd8] hover:underline"
+                >
+                  Log in here
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+      )}
 
-      </div>
-
-    </div>
-</div>
-<script nonce="d472a23656e79d0e0d6ee087bd15667a">
-  discordInvite.init({
-  inviteCode: '3kddCVn',
-  title: 'Art Fight',
-});
-discordInvite.render();
-</script>
-    </div>
-        </div> <!-- /content -->
-        <footer class="footer">
-  <div class="contain">
-    <div class="row">
-    <div class="col-md-4" style="padding-top:23px;">
-        <div id="clockbox"></div>
-        <div class="social">
-            <div class="twitter">
-                <a href="https://twitter.com/theartfight" target="_blank"><i class="fab fa-twitter"></i></a>
-            </div>
-            <div class="instagram">
-                <a href="https://www.instagram.com/artfight" target="_blank"><i class="fab fa-instagram"></i></a>
-            </div>
-            <div class="twitch">
-                <a href="https://twitch.tv/theartfight" target="_blank"><i class="fab fa-twitch"></i></a>
-            </div>
-            <div class="tumblr">
-                <a href="https://tumblr.com/artfight" target="_blank"><i class="fab fa-tumblr"></i></a>
-            </div>
-            <div class="tiktok">
-                <a href="https://www.tiktok.com/@theartfight" target="_blank"><i class="fab fa-tiktok"></i></a>
-            </div>
-            <div class="youtube">
-                <a href="https://www.youtube.com/@ArtFightOfficial" target="_blank"><i class="fab fa-youtube"></i></a>
-            </div>
-            <div class="bluesky">
-                <a href="https://bsky.app/profile/artfight.net" target="_blank"><i class="fab fa-bluesky"></i></a>
-            </div>
-        </div>
-      </div>
-      <div class="col-md-4" style="padding-top:23px;">
-        <ul class="list-inline text-center">
-            <li class="list-inline-item ml-2"><a href="https://artfight.net/info/help">Help</a></li> |
-            <li class="list-inline-item ml-2"><a href="https://artfight.net/info/contact-us">Contact a Mod</a></li> |
-            <li class="list-inline-item ml-2"><a href="https://artfight.net/info/rules">Rules</a></li> |
-            <li class="list-inline-item ml-2"><a href="https://artfight.net/info/tos">ToS</a></li> |
-            <li class="list-inline-item ml-2"><a href="https://artfight.net/info/privacy">Privacy</a></li>
-        </ul>
-        <ul class="list-inline text-center">
-            <li class="list-inline-item"><a href="https://artfight.net/info/credits">Credits</a></li> |
-            <li class="list-inline-item">&copy; 2015 <a href="https://artfight.net/lolwut">-</a> 2025 Art Fight</li>
-        </ul>
-      </div>
-      <div class="col-md-4 mb-4" style="padding-top: 23px; background-image: url();">
-                <div class="d-flex donate-section">
-            <div class="donation_meter">
-                <progress class="mt-0" max="200000" value="193995.45"></progress>
-                <br>
-                <div class="d-flex mt-2">
-                    <div>
-                        2025 Contributions: <b>$193995.45</b><br>Goal (tier 3): $200000 <a href="https://artfight.net/donate"><i class="far fa-info-circle" data-toggle="tooltip" data-placement="top" title="Click to learn all about contributions to art fight and rewards you can get for contributing."></i></a>
-                    </div>
-                    <form class="ml-auto" action="https://artfight.net/donate">
-                        <button type="submit" class="btn btn-primary donate-button" data-toggle="tooltip" data-placement="top" title="Click to contribute and to learn all about contributions to art fight and rewards you can get for contributing.">Support</button>
-                    </form>
+      {/* Character Detail Modal */}
+      {selectedCharacter && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setSelectedCharacter(null)}>
+          <div className="bg-[#2a2a2a] rounded-lg max-w-4xl w-full border-2 border-gray-700 relative" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setSelectedCharacter(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl z-10 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center"
+            >
+              ✕
+            </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8">
+              <div>
+                <img
+                  src={selectedCharacter.src}
+                  alt={selectedCharacter.name}
+                  className="w-full rounded-lg border-4 border-[#d4beab]"
+                />
+              </div>
+              <div>
+                <div className="mb-4">
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                    selectedCharacter.team === 'seafoam' ? 'bg-[#5fabd8] text-white' : 'bg-[#bb415e] text-white'
+                  }`}>
+                    Team {selectedCharacter.team.charAt(0).toUpperCase() + selectedCharacter.team.slice(1)}
+                  </span>
                 </div>
-            </div>
-            <div class="ml-2">
-                <img class="donate-wormston" src="https://images.artfight.net/resources/wormston_tier_2.png" />
-            </div>
-        </div>
+                <h2 className="text-4xl font-bold mb-2 text-[#5fabd8]">{selectedCharacter.name}</h2>
+                <p className="text-gray-400 mb-6">Owner: <span className="text-white">{selectedCharacter.owner}</span></p>
+
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Character Description</h3>
+                    <p className="text-gray-300">
+                      This is a wonderful character created for Art Fight 2025! They love adventures and making new friends.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-[#1a1a1a] rounded-full text-sm">Original Character</span>
+                      <span className="px-3 py-1 bg-[#1a1a1a] rounded-full text-sm">Fantasy</span>
+                      <span className="px-3 py-1 bg-[#1a1a1a] rounded-full text-sm">Colorful</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setSelectedCharacter(null);
+                      setShowAttackForm(true);
+                    }}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition-colors"
+                  >
+                    Attack This Character
+                  </button>
+                  <button className="px-6 bg-[#417682] hover:bg-[#4f8a98] text-white font-bold py-3 rounded transition-colors">
+                    ♥ Favorite
+                  </button>
+                </div>
               </div>
+            </div>
+          </div>
         </div>
-    </div>
-</footer>
-    </div>
+      )}
 
-    <div id="modal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">
-                    </h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-      <div class="modal-body">
-                                  </div>
-      <div class="modal-footer">
+      {/* Attack Submission Form */}
+      {showAttackForm && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-[#2a2a2a] rounded-lg p-8 max-w-2xl w-full border-2 border-gray-700 relative my-8">
+            <button
+              onClick={() => setShowAttackForm(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
+            >
+              ✕
+            </button>
+            <h2 className="text-3xl font-bold mb-6 text-[#5fabd8]">Submit an Attack</h2>
+            <form className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Attack Title</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Give your artwork a title"
+                />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Target Character</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors"
+                  placeholder="Search for a character to attack"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Upload Artwork</label>
+                <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-[#5fabd8] transition-colors cursor-pointer">
+                  <input type="file" className="hidden" id="artwork-upload" accept="image/*" />
+                  <label htmlFor="artwork-upload" className="cursor-pointer">
+                    <div className="text-4xl mb-2">📁</div>
+                    <p className="text-gray-400">Click to upload or drag and drop</p>
+                    <p className="text-sm text-gray-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors h-32 resize-none"
+                  placeholder="Describe your artwork (optional)"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Attack Type</label>
+                <select className="w-full px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:outline-none focus:border-[#5fabd8] transition-colors">
+                  <option>Full Body</option>
+                  <option>Half Body</option>
+                  <option>Bust</option>
+                  <option>Sketch</option>
+                  <option>Chibi</option>
+                </select>
+              </div>
+
+              <div className="flex items-start gap-2 text-sm">
+                <input type="checkbox" className="mt-1" />
+                <span className="text-gray-400">I confirm that this artwork is my original creation and follows Art Fight rules</span>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition-colors"
+                >
+                  Submit Attack
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAttackForm(false)}
+                  className="px-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
-
-  </div>
-</div>
-      <script nonce="d472a23656e79d0e0d6ee087bd15667a">
-          $(document).on("click", ".modal-button", async function (e) {
-              // If we have a thumbnail cropper in a modal on this page, run the cropper's onSubmit function instead.
-              if (document.getElementById('modal-form').querySelector('.thumbnail-cropper-container')) {
-                await onCropperFormSubmit(e, true);
-                return;
-              } 
-
-              e.preventDefault();
-              $("#modal-form").submit();
-          });
-      </script>
-        
-        <script nonce="d472a23656e79d0e0d6ee087bd15667a">
-            $(function () {
-                $('[data-toggle="tooltip"]').tooltip()
-            })
-        </script>
-
-        
-        <script nonce="d472a23656e79d0e0d6ee087bd15667a">
-            var selection = document.querySelector('.form-submit-once');
-            if (selection !== null) {
-                selection.addEventListener('submit', function() {
-                    var btnSubmitOnce = document.querySelector('.btn-submit-once');
-                    btnSubmitOnce.setAttribute('disabled', 'true');
-                    btnSubmitOnce.value = "Submitting, please wait.";
-                });
-            };
-        </script>
-
-        <script nonce="d472a23656e79d0e0d6ee087bd15667a">
-            $(document).on('click', '.spoiler-button', function () {
-                let $button = $(this);
-                let $panelBody = $button.closest('.spoiler').find('.panel-body');
-
-                let isVisible = $panelBody.is(':visible');
-                $panelBody.toggle(!isVisible);
-                $button.text(isVisible ? 'Show' : 'Hide');
-            });
-        </script>
-  </body>
-</html>
+  );
+}

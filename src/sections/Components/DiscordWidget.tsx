@@ -26,3 +26,17 @@ export const DiscordWidget = () => {
               </div>
             </div>
           </div>
+         </div>
+          <button
+            type="button"
+            className="relative text-sm font-medium items-center self-center bg-emerald-400 caret-transparent flex h-10 justify-center leading-5 min-h-8 min-w-[73px] break-words text-center ml-2.5 px-4 py-0.5 rounded-[3px] inset-0 hover:bg-green-500"
+          >
+            <div className="box-border caret-transparent flex h-5 break-words text-ellipsis overflow-hidden mx-2">
+              Join
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

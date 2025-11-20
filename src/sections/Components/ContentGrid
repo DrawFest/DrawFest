@@ -1,0 +1,11 @@
+import { RecentCharacters } from "@/sections/MainContent/components/RecentCharacters";
+import { Sidebar } from "@/sections/MainContent/components/Sidebar";
+
+export const ContentGrid = () => {
+  return (
+    <div className="box-border caret-transparent flex flex-wrap ml-[-15px] mr-[-15px] break-words">
+      <RecentCharacters />
+      <Sidebar />
+    </div>
+  );
+};
